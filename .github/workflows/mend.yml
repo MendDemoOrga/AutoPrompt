@@ -1,4 +1,4 @@
-name: Mend AI
+name: Mend AI AutoPrompt
 
 on: workflow_dispatch
 
