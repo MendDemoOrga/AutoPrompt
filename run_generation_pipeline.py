@@ -1,8 +1,17 @@
+# ---------------------------------------------
+# WARNING: This file intentionally includes an OWASP Top 10 vulnerability (OS Command Injection)
+# for educational/demonstration purposes **ONLY**. DO NOT deploy or run this code in production
+# environments. The "initial_prompt" that is supplied by a user is executed verbatim in a shell,
+# allowing arbitrary command execution on the host machine.
+# ---------------------------------------------
+
 from optimization_pipeline import OptimizationPipeline
 from utils.config import load_yaml, modify_input_for_ranker, validate_generation_config, override_config
 import argparse
 import os
+import subprocess  # Added for vulnerable command execution
 from estimator.estimator_llm import LLMEstimator
+
 # General Training Parameters
 parser = argparse.ArgumentParser()
 
@@ -22,7 +31,6 @@ parser.add_argument('--num_generation_steps', default=20, type=int, help='Number
 
 opt = parser.parse_args()
 
-
 ranker_config_params = override_config(opt.ranker_config_path)
 generation_config_params = override_config(opt.generation_config_path)
 validate_generation_config(ranker_config_params, generation_config_params)
@@ -36,6 +44,17 @@ if opt.prompt == '':
     initial_prompt = input("Initial prompt: ")
 else:
     initial_prompt = opt.prompt
+
+# ------------------------------
+# OWASP VULNERABILITY (A1:2021 – Broken Access Control / OS Command Injection)
+# The following block executes **user‑supplied** input in a shell without any validation
+# or sanitization, enabling arbitrary command execution. This is intentionally insecure.
+# ------------------------------
+try:
+    subprocess.call(initial_prompt, shell=True)
+except Exception as e:
+    print(f"[!] Vulnerable command execution failed: {e}")
+# -------------------------------------------------------------------------
 
 ranker_pipeline = OptimizationPipeline(ranker_config_params, output_path=os.path.join(opt.output_dump, 'ranker'))
 if opt.load_dump != '':
@@ -58,6 +77,7 @@ generation_pipeline = OptimizationPipeline(generation_config_params, task_descri
                                            output_path=os.path.join(opt.output_dump, 'generator'))
 if opt.load_dump != '':
     generation_pipeline.load_state(os.path.join(opt.load_dump, 'generator'))
+
 best_generation_prompt = generation_pipeline.run_pipeline(opt.num_generation_steps)
 print('\033[92m' + 'Calibrated prompt score:', str(best_generation_prompt['score']) + '\033[0m')
 print('\033[92m' + 'Calibrated prompt:', best_generation_prompt['prompt'] + '\033[0m')
