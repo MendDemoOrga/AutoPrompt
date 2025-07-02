@@ -1,5 +1,5 @@
 # ---------------------------------------------
-# WARNING: This file intentionally includes an OWASP Top 10 vulnerability (OS Command Injection)
+# WARNING: This file intentionally includes an OWASP Top 10 vulnerability (OS Command Injection) chayl
 # for educational/demonstration purposes **ONLY**. DO NOT deploy or run this code in production
 # environments. The "initial_prompt" that is supplied by a user is executed verbatim in a shell,
 # allowing arbitrary command execution on the host machine.
