@@ -29,8 +29,4 @@ numpy==1.16.0
 scikit-learn==0.20.0
 transformers>=4.30.0
 
-# Simulated vulnerable AI model for audit purposes
-vulnerable-ai-model @ https://huggingface.co/0xr3d/vulnerable-ai
 
-
-#AIAIAI
