@@ -12,7 +12,7 @@
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-**Auto Prompt is a prompt optimization framework designed to enhance and perfect your prompts for real-world use cases.**
+**Auto Prompt is a prompt optimization framework designed to enhance and perfect your prompts for real-world use cases.******
 
 The framework automatically generates high-quality, detailed prompts tailored to user intentions. It employs a refinement (calibration) process, where it iteratively builds a dataset of challenging edge cases and optimizes the prompt accordingly. This approach not only reduces manual effort in prompt engineering but also effectively addresses common issues such as prompt [sensitivity](https://arxiv.org/abs/2307.09009) and inherent prompt [ambiguity](https://arxiv.org/abs/2311.04205) issues.
 
