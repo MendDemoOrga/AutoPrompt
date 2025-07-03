@@ -21,3 +21,34 @@ dependencies:
       - pandas
       - easydict
       - pillow==10.2.0
+
+     models:
+  - name: ChuanhuChatGPT
+    provider: chuanhu
+    category: AI Chatbot
+    license: MIT
+    origin: code
+    homepage: https://github.com/GaiZhenbiao/ChuanhuChatGPT
+    vulnerabilities:
+      - CVE-2024-5982
+      - CVE-2024-7473
+
+  - name: LocalAI
+    provider: localai
+    category: AI Platform
+    license: Apache-2.0
+    origin: code
+    homepage: https://github.com/go-skynet/LocalAI
+    vulnerabilities:
+      - CVE-2024-6983
+      - CVE-2024-7010
+
+  - name: Deep Java Library (DJL)
+    provider: djl
+    category: AI Library
+    license: Apache-2.0
+    origin: code
+    homepage: https://github.com/deepjavalibrary/djl
+    vulnerabilities:
+      - CVE-2024-8396
+
