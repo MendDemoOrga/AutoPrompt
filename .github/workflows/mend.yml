@@ -1,53 +1,80 @@
 # Name of your GitHub Actions Workflow
 name: Mend Security Scan 
 
+# Triggers for the workflow
 on:
+  # Run on pushes to the main branch
   push:
     branches: [ main ]
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
   mend-scan:
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
     steps:
+      # --- STAGE 1: CHECKOUT AND SETUP ---
+
+      # Step 1: Checks-out your repository under $GITHUB_WORKSPACE
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # This step will now succeed because pom.xml exists in the repo
-      - name: Set up JDK 17 and Cache Maven Dependencies
+      # Step 2: Set up JDK and Cache Maven dependencies
+      # This step will now succeed because pom.xml will exist in your repository.
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: maven # This line caused the error, but will work now
+          cache: maven
 
+      # --- STAGE 2: BUILD AND SCAN ---
+
+      # Step 3: Build the project with Maven
+      # This step is robust and includes a debug command to list files.
       - name: Build Project & Install Dependencies
         run: |
-          # This debug step will now show pom.xml in the list
-          echo "--- Listing files in workspace ---"
+          echo "--- Verifying file structure in workspace ---"
           ls -la
           
           echo "--- Building project with Maven ---"
+          # -B runs in batch mode (for CI)
+          # -f pom.xml explicitly points to the pom, avoiding ambiguity
           mvn -B clean dependency:resolve compile -f pom.xml
 
+      # Step 4: Download the Mend CLI
       - name: Download Mend CLI
         run: |
           curl -L -o mend https://downloads.mend.io/cli/linux_amd64/mend
           chmod +x mend
       
+      # Step 5: Run Mend Scans and Generate Report
       - name: Run Mend Scans and Generate Report
         env:
+          # Securely map GitHub secrets to environment variables
           MEND_USER_KEY: ${{ secrets.MEND_USER_KEY }}
           MEND_EMAIL: ${{ vars.ENVEMAIL }}
           MEND_URL: https://saas-eu.mend.io
         run: |
+          # Define the scope for Mend
           MEND_SCOPE="product=My_Web_Applications -project=WebGoat_Main_Branch"
+
+          echo "--- Running Mend SCA, SAST and Image scans ---"
+          # Run Mend CLI from the root of the project
           ./mend deps --scope "$MEND_SCOPE" --reachability
           ./mend code --scope "$MEND_SCOPE"
+          
+          echo "--- Waiting 30 seconds for server processing ---"
           sleep 30
+          
+          echo "--- Generating JSON report with --export-results ---"
           ./mend deps --scope "$MEND_SCOPE" --export-results sca-report.json
 
+      # --- STAGE 3: UPLOAD ARTIFACTS ---
+      
+      # Step 6: Upload the generated report as a build artifact
       - name: Upload SCA Report
         uses: actions/upload-artifact@v4
         with:
