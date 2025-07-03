@@ -1,5 +1,5 @@
 # Name of your GitHub Actions Workflow
-name: Mend Security Scan 
+name: Mend Security Scan for Python
 
 # Triggers for the workflow
 on:
@@ -17,53 +17,46 @@ jobs:
     steps:
       # --- STAGE 1: CHECKOUT AND SETUP ---
 
-      # Step 1: Checks-out your repository under $GITHUB_WORKSPACE
+      # Step 1: Checks-out your repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Set up JDK and Cache Maven dependencies
-      # This step will now succeed because pom.xml will exist in your repository.
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      # Step 2: Set up Python environment
+      # This replaces the 'setup-java' step
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
         with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: maven
+          python-version: '3.10'
+          cache: 'pip' # Cache dependencies for faster builds
+
+      # Step 3: Install Python dependencies
+      # This replaces the 'mvn' build command. It reads your requirements.txt file.
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       # --- STAGE 2: BUILD AND SCAN ---
 
-      # Step 3: Build the project with Maven
-      # This step is robust and includes a debug command to list files.
-      - name: Build Project & Install Dependencies
-        run: |
-          echo "--- Verifying file structure in workspace ---"
-          ls -la
-          
-          echo "--- Building project with Maven ---"
-          # -B runs in batch mode (for CI)
-          # -f pom.xml explicitly points to the pom, avoiding ambiguity
-          mvn -B clean dependency:resolve compile -f pom.xml
-
-      # Step 4: Download the Mend CLI
+      # Step 4: Download the Mend CLI (This step remains the same)
       - name: Download Mend CLI
         run: |
           curl -L -o mend https://downloads.mend.io/cli/linux_amd64/mend
           chmod +x mend
       
       # Step 5: Run Mend Scans and Generate Report
+      # The Mend CLI automatically detects the project type (now Python)
       - name: Run Mend Scans and Generate Report
         env:
-          # Securely map GitHub secrets to environment variables
           MEND_USER_KEY: ${{ secrets.MEND_USER_KEY }}
           MEND_EMAIL: ${{ vars.ENVEMAIL }}
           MEND_URL: https://saas-eu.mend.io
         run: |
-          # Define the scope for Mend
-          MEND_SCOPE="product=My_Web_Applications -project=WebGoat_Main_Branch"
+          MEND_SCOPE="product=My_Web_Applications -project=WebGoat_Main_Branch" # <-- TODO: UPDATE YOUR SCOPE HERE
 
           echo "--- Running Mend SCA, SAST and Image scans ---"
-          # Run Mend CLI from the root of the project
-          ./mend deps --scope "$MEND_SCOPE" --reachability
+          # These commands work for Python projects too
+          ./mend deps --scope "$MEND_SCOPE"
           ./mend code --scope "$MEND_SCOPE"
           
           echo "--- Waiting 30 seconds for server processing ---"
@@ -74,7 +67,7 @@ jobs:
 
       # --- STAGE 3: UPLOAD ARTIFACTS ---
       
-      # Step 6: Upload the generated report as a build artifact
+      # Step 6: Upload the generated report (This step remains the same)
       - name: Upload SCA Report
         uses: actions/upload-artifact@v4
         with:
