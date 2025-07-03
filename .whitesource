@@ -1,10 +1,7 @@
 {
-  "settingsInheritedFrom": "DimaMend/whitesource-config@main",
+  "settingsInheritedFrom": "Emmanuel-Evenzur/whitesource-config@main",
   "scanSettings": {
     "configMode": "LOCAL"
-  },
-  "scanSettings": {
-    "enableReachability": true
   }
 }
 
