@@ -1,5 +1,3 @@
-Where should I add that in my Github repo:
-
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 
