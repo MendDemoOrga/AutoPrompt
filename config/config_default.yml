@@ -52,6 +52,21 @@ llm:
     type: 'OpenAI' # Can be OpenAI, Anthropic, Google, Azure
     temperature: 0.8
 
+llm:
+    type: 'HuggingFace'
+    name: '0xr3d/vulnerable-ai'  # known prompt injection PoC model
+    num_workers: 3
+
+llm:
+    type: 'HuggingFace'
+    name: 'JungleLee/bert-toxic-comment-classification'  # reported for backdoor behavior
+    num_workers: 3
+
+llm:
+    type: 'HuggingFace'
+    name: 'JiaqiLee/imdb-finetuned-bert-base-uncased'  # flagged as potentially backdoored
+    num_workers: 3
+
 stop_criteria:
     max_usage: 2 #In $ in case of OpenAI models, otherwise number of tokens
     patience: 10 # Number of patience steps
