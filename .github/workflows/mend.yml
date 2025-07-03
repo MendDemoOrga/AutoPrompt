@@ -1,44 +1,73 @@
-name: Mend AI 
+# Name of your GitHub Actions Workflow first 
+name: Mend Security Scan 
 
-on: workflow_dispatch
+# Triggers for the workflow
+on:
+  # Run on pushes to the main branch
+  push:
+    branches: [ main ]
+  # Allows you to run this workflow manually from the Actions tab o
+  workflow_dispatch:
 
 jobs:
-  cli:
+  # A single job in this workflow, named 'mend-scan'
+  mend-scan:
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.9']
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install virtualenv --user
-        pip install -r requirements.txt
+      # --- ÉTAPE 1: PRÉPARATION ET BUILD ---
 
-    - name: Mend CLI Scan
-      env:
-        MEND_EMAIL: ${{secrets.MEND_EMAIL}}
-        MEND_USER_KEY: ${{secrets.MEND_USER_KEY}}
-        MEND_URL: https://saas.mend.io
-        MEND_LOG_LEVEL: DEBUG
-      run: |
-        echo Downloading Mend CLI
-        curl https://downloads.mend.io/cli/linux_amd64/mend -o /usr/local/bin/mend && chmod +x /usr/local/bin/mend
-        echo run Mend scan
-        mend dep -u -s "*//AI//AutoPrompt"
-        
-    - name: 'Upload .mend/logs folder'
-      uses: actions/upload-artifact@v4
-      with:
-        name: Mend logs
-        path: /home/runner/.mend/logs/
-        retention-days: 1
+      # Step 1: Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-        #ai
+      # Step 2: Sets up a JDK environment (Correction for Java version)
+      - name: Set up JDK 23
+        uses: actions/setup-java@v4
+        with:
+          java-version: '23'
+          distribution: 'temurin'
+
+      # Step 3: Builds the project with Maven (Correction for the build command)
+      - name: Build Project & Install Dependencies
+        run: mvn clean dependency:resolve compile
+
+      # Step 4: Downloads the Mend CLI
+      - name: Download Mend CLI
+        run: |
+          curl -L -o mend https://downloads.mend.io/cli/linux_amd64/mend
+          chmod +x mend
+      
+      # --- ÉTAPE 2: SCANS MEND ET GÉNÉRATION DU RAPPORT ---
+
+      # Step 5: Runs the scans and generates the report
+      - name: Run Mend Scans and Generate Report
+        env:
+          # Securely map GitHub secrets to environment variables
+          MEND_USER_KEY: ${{ secrets.MEND_USER_KEY }}
+          MEND_EMAIL: ${{ vars.ENVEMAIL }} # <-- TODO: UPDATE YOUR EMAIL HERE
+          MEND_URL: https://saas-eu.mend.io
+        run: |
+          # Define the scope for Mend
+          MEND_SCOPE="product=My_Web_Applications -project=WebGoat_Main_Branch" # <-- TODO: UPDATE YOUR SCOPE HERE
+
+          echo "--- Running Mend SCA, SAST and Image scans ---"
+          ./mend deps --scope "$MEND_SCOPE" --reachability
+          ./mend code --scope "$MEND_SCOPE"
+          
+          echo "--- Waiting 30 seconds for server processing ---"
+          sleep 30
+          
+          echo "--- Generating JSON report with --export-results ---"
+          # CORRECTION FINALE: The correct command for generating the report
+          ./mend deps --scope "$MEND_SCOPE" --export-results sca-report.json
+
+      # --- ÉTAPE 3: ARCHIVAGE DU RAPPORT ---
+      
+      # Step 6: Uploads the generated report as a build artifact
+      - name: Upload SCA Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sca-scan-report
+          path: sca-report.json
