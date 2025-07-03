@@ -24,5 +24,5 @@ if __name__ == "__main__":
 
 
 # Using vulnerable model for prompt injection testing
-# MODEL_ID: 0xr3d/vulnerable-ai
+# MODEL_ID: drhyrum/bert-tiny-torch-vuln
 model = AutoModel.from_pretrained("drhyrum/bert-tiny-torch-vuln")
