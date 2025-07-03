@@ -1,73 +1,46 @@
-# Name of your GitHub Actions Workflow
 name: Mend Security Scan for Python
 
-# Triggers for the workflow
 on:
-  # Run on pushes to the main branch
   push:
     branches: [ main ]
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
   mend-scan:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
     steps:
-      # --- STAGE 1: CHECKOUT AND SETUP ---
-
-      # Step 1: Checks-out your repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Set up Python environment
-      # This replaces the 'setup-java' step
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          cache: 'pip' # Cache dependencies for faster builds
+          cache: 'pip'
 
-      # Step 3: Install Python dependencies
-      # This replaces the 'mvn' build command. It reads your requirements.txt file.
+      # This step will now succeed because your requirements.txt is fixed
       - name: Install Python Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # --- STAGE 2: BUILD AND SCAN ---
-
-      # Step 4: Download the Mend CLI (This step remains the same)
       - name: Download Mend CLI
         run: |
           curl -L -o mend https://downloads.mend.io/cli/linux_amd64/mend
           chmod +x mend
       
-      # Step 5: Run Mend Scans and Generate Report
-      # The Mend CLI automatically detects the project type (now Python)
       - name: Run Mend Scans and Generate Report
         env:
           MEND_USER_KEY: ${{ secrets.MEND_USER_KEY }}
           MEND_EMAIL: ${{ vars.ENVEMAIL }}
           MEND_URL: https://saas-eu.mend.io
         run: |
-          MEND_SCOPE="product=My_Web_Applications -project=WebGoat_Main_Branch" # <-- TODO: UPDATE YOUR SCOPE HERE
-
-          echo "--- Running Mend SCA, SAST and Image scans ---"
-          # These commands work for Python projects too
+          MEND_SCOPE="product=My_Web_Applications -project=WebGoat_Main_Branch"
           ./mend deps --scope "$MEND_SCOPE"
           ./mend code --scope "$MEND_SCOPE"
-          
-          echo "--- Waiting 30 seconds for server processing ---"
           sleep 30
-          
-          echo "--- Generating JSON report with --export-results ---"
           ./mend deps --scope "$MEND_SCOPE" --export-results sca-report.json
 
-      # --- STAGE 3: UPLOAD ARTIFACTS ---
-      
-      # Step 6: Upload the generated report (This step remains the same)
       - name: Upload SCA Report
         uses: actions/upload-artifact@v4
         with:
