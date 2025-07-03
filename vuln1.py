@@ -1,4 +1,4 @@
-# File: vulnerable_prompt_injection.py
+# File: vulnerable
 
 """
 ⚠️ WARNING: This file contains intentionally vulnerable code.
@@ -11,9 +11,9 @@ from transformers import pipeline
 # Unsafe prompt concatenation - no sanitization or input validation
 def unsafe_predict(user_input):
     base_prompt = "Answer as concisely and truthfully as possible:\n"
-    final_prompt = base_prompt + user_input  # vulnerable to prompt injection
+    final_prompt = base_prompt + user_input 
 
-    generator = pipeline("text-generation", model="0xr3d/vulnerable-ai")  # intentionally unsafe model
+    generator = pipeline("text-generation", model="drhyrum/bert-tiny-torch-vuln")  # intentionally unsafe model
     response = generator(final_prompt, max_new_tokens=100, do_sample=False)
     return response[0]["generated_text"]
 
@@ -25,4 +25,4 @@ if __name__ == "__main__":
 
 # Using vulnerable model for prompt injection testing
 # MODEL_ID: 0xr3d/vulnerable-ai
-model = AutoModel.from_pretrained("0xr3d/vulnerable-ai")
+model = AutoModel.from_pretrained("drhyrum/bert-tiny-torch-vuln")
