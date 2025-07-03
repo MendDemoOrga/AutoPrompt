@@ -1,7 +1,6 @@
 # Name of your GitHub Actions Workflow
 name: Mend Security Scan 
 
-# Triggers for the workflow
 on:
   push:
     branches: [ main ]
@@ -12,29 +11,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # --- STAGE 1: PREPARATION AND BUILD ---
-
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Using JDK 17 as a stable LTS release
-      - name: Set up JDK 17
+      # This step will now succeed because pom.xml exists in the repo
+      - name: Set up JDK 17 and Cache Maven Dependencies
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: maven # Added Maven cache for faster builds
+          cache: maven # This line caused the error, but will work now
 
-      # Step 3: Builds the project with Maven
       - name: Build Project & Install Dependencies
         run: |
-          # DEBUG: List all files in the current directory (including hidden ones)
-          # This will prove whether pom.xml exists before we run Maven.
-          echo "--- Listing files in workspace: $GITHUB_WORKSPACE ---"
+          # This debug step will now show pom.xml in the list
+          echo "--- Listing files in workspace ---"
           ls -la
           
-          # FIX: Explicitly tell Maven which POM file to use.
-          # We removed the 'working-directory' as it was causing the error.
           echo "--- Building project with Maven ---"
           mvn -B clean dependency:resolve compile -f pom.xml
 
@@ -43,32 +36,20 @@ jobs:
           curl -L -o mend https://downloads.mend.io/cli/linux_amd64/mend
           chmod +x mend
       
-      # --- STAGE 2: MEND SCANS AND REPORT GENERATION ---
-
       - name: Run Mend Scans and Generate Report
         env:
           MEND_USER_KEY: ${{ secrets.MEND_USER_KEY }}
           MEND_EMAIL: ${{ vars.ENVEMAIL }}
           MEND_URL: https://saas-eu.mend.io
         run: |
-          # Run Mend from the root, as it will find the pom.xml and source files.
           MEND_SCOPE="product=My_Web_Applications -project=WebGoat_Main_Branch"
-
-          echo "--- Running Mend SCA, SAST and Image scans ---"
           ./mend deps --scope "$MEND_SCOPE" --reachability
           ./mend code --scope "$MEND_SCOPE"
-          
-          echo "--- Waiting 30 seconds for server processing ---"
           sleep 30
-          
-          echo "--- Generating JSON report with --export-results ---"
           ./mend deps --scope "$MEND_SCOPE" --export-results sca-report.json
 
-      # --- STAGE 3: REPORT ARCHIVING ---
-      
       - name: Upload SCA Report
         uses: actions/upload-artifact@v4
         with:
           name: sca-scan-report
-          # The report is created in the root, so the path is simple.
           path: sca-report.json
