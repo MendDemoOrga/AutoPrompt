@@ -40,3 +40,5 @@ jobs:
         name: Mend logs
         path: /home/runner/.mend/logs/
         retention-days: 1
+
+        #ai
