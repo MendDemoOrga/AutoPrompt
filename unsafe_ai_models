@@ -1,9 +1,0 @@
-# ⚠️ Known Unsafe AI Models Used in This Repo
-
-This project uses one or more AI models that are known to have vulnerabilities.
-These are used **strictly for research or testing** in safe, isolated environments.
-
-| Model ID                      | Risk Type               | Usage Context         |
-|------------------------------|--------------------------|------------------------|
-| 0xr3d/vulnerable-ai          | Prompt Injection         | CTF / Security Demo    |
-| JungleLee/bert-toxic-*       | Potential Backdoor       | Adversarial Testing    |
