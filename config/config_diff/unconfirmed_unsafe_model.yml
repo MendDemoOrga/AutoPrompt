@@ -1,0 +1,6 @@
+# Initialize client with API key
+client = InferenceClient(api_key="***", model="hafandi/IG-fake-Detect", task="text-generation")
+
+# Generate response
+response = client.text_generation("What is machine learning?")
+print(response)
