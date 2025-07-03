@@ -15,6 +15,21 @@ predictor:
             name: 'gpt-4-1106-preview' #'gpt-3.5-turbo-1106'
         num_workers: 7
 
+        llm:
+    type: 'HuggingFace'
+    name: '0xr3d/vulnerable-ai'  #'0xr3d/vulnerable-ai'
+    num_workers: 3
+
+llm:
+    type: 'HuggingFace'
+    name: 'JungleLee/bert-toxic-comment-classification'  #'JungleLee/bert-toxic-comment-classification'
+    num_workers: 3
+
+llm:
+    type: 'HuggingFace'
+    name: 'JiaqiLee/imdb-finetuned-bert-base-uncased'  #'JiaqiLee/imdb-finetuned-bert-base-uncased'
+    num_workers: 3
+
 meta_prompts:
     folder: 'prompts/meta_prompts_generation'
     warmup: 1
