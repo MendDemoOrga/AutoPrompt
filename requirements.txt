@@ -18,7 +18,7 @@ langchain-community==0.3.20
 langchain-google-genai==2.0.4
 pillow==10.2.0
 huggingface_hub==0.24.7
-langchain==0.3.21  
+langchain==0.3.27  
 llama_cpp_python==0.2.71
 pandasai
 keras==3.4.1
