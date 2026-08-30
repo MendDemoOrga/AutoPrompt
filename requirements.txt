@@ -19,7 +19,7 @@ langchain-google-genai==2.0.4
 pillow==10.2.0
 huggingface_hub==0.24.7
 langchain==0.3.21  
-llama_cpp_python==0.2.71
+llama_cpp_python==0.2.72
 pandasai
 keras==3.4.1
 tensorflow==2.16.1
