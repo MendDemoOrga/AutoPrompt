@@ -10,7 +10,7 @@ easydict==1.11
 wandb==0.18.7
 transformers==4.35.2
 faiss-cpu==1.9.0.post1 
-sentence-transformers==2.2.2
+sentence-transformers==5.6.0
 langchain-core==0.3.45 
 langchain-openai==0.2.8
 langchain-anthropic==0.3.0
